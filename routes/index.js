@@ -1,4 +1,5 @@
 var Bbs = require('../persister/bbs');
+var Clients = require('../persister/clients');
 
 module.exports = function(app, passport){
 	
@@ -133,6 +134,73 @@ module.exports = function(app, passport){
 			}
 			bbs.vote +=1;
 			bbs.save(function(){
+				res.send({"result":true});	
+			})
+			
+		})
+	});
+	
+	// Clients
+	app.get('/clients',isAuthenticated, function(req, res) {
+	   res.render('template/bbs', {});
+	});
+	
+	app.get('/clients/list',isAuthenticated, function(req, res) {
+		 Clients.find({}, 
+	      function(err, clients) {
+	        // In case of any error, return using the done method
+	        if (err)
+	          return done(err);
+	        // Username does not exist, log error & redirect back
+	        res.send(clients);
+	      }
+	    );
+	});
+
+	app.post('/clients/create',isAuthenticated, function(req, res) {
+		
+		var newClients = new Clients();
+		// set the user's local credentials
+		newClients.content = req.param('content');
+		//newBbs.vote = 0;
+		//newBbs.username = req.user.username;
+		
+		// save the user
+		newClients.save(function(err) {
+			if (err){
+			  console.log('Error in Saving clients: '+err);  
+			  res.send({"result":false});
+			}
+			res.send({"result":true});
+		});
+	});
+
+	app.post('/clients/delete',isAuthenticated, function(req, res) {
+		// set the user's local credentials
+		var id = req.param('id');
+		Clients.findByIdAndRemove(id,function(err){
+			if (err){
+			  console.log('Error in Saving clients: '+err);  
+			  res.send({"result":false});
+			}
+
+
+			res.send({"result":true});
+		})
+
+		
+	});
+	app.post('/clients/update',isAuthenticated, function(req, res) {
+		// set the user's local credentials
+		var id = req.param('id');
+
+		Clients.findById(id,function(err,clients){
+			if (err){
+			  console.log('Error in Saving clients: '+err);  
+			  res.send({"result":false});
+			}
+			//bbs.vote +=1;
+			clients.save(function(){
 				res.send({"result":true});	
 			})
 			
